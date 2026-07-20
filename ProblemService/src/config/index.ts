@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 type ServerConfig = {
     PORT: number
     DB_URL:string
+    
 }
 
 function loadEnv() {
