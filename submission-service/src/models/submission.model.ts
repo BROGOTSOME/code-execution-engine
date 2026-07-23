@@ -1,8 +1,8 @@
 import { Document, Schema, model } from "mongoose";
     
 export enum SubmissionLanguage{
-    CPP="cpp",
-    PYTHON="py"
+     CPP = "cpp",
+    PYTHON = "python"
 }
 export enum SubmissionStatus {
     COMPLETED = "completed",

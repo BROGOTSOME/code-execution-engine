@@ -21,10 +21,18 @@ function matchTestCasesWithResults(testCases: TestCase[], results: EvaluationRes
             retval = "Error";
         } else {
             // match the output with the test case output
-            if(results[index].output === testCase.output) {
-                retval = "AC";
+            // if(results[index].output === testCase.output) {
+            //     retval = "Accepted";;
+            // } else {
+            //     retval = "Wrong Answer";
+            // }
+            const actual = JSON.parse(results[index]?.output?.trim() || "");
+            const expected = JSON.parse(testCase.output.trim());
+
+            if (JSON.stringify(actual) === JSON.stringify(expected)) {
+                retval = "Accepted";
             } else {
-                retval = "WA";
+                retval = "Wrong Answer";
             }
         }
 
@@ -57,7 +65,7 @@ async function setupEvaluationWorker(){
 
             const testCasesRunnerResults: EvaluationResult[] = await Promise.all(testCasesRunnerPromise);
 
-            console.log("testCasesRunnerResults", testCasesRunnerResults);
+            logger.info("testCasesRunnerResults", testCasesRunnerResults);
 
             const output = matchTestCasesWithResults(data.problem.testcases, testCasesRunnerResults);
 

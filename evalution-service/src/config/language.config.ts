@@ -1,7 +1,7 @@
 import { CPP_IMAGE, PYTHON_IMAGE } from "../utils/constants";
 
 export const LANGUAGE_CONFIG = {
-    python: {
+    python: { // python is the key in the database
         timeout: 4000,
         imageName: PYTHON_IMAGE
     },
