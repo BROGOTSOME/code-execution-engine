@@ -1,29 +1,94 @@
+
 services:
-  redis:
+  #mongdo db setup
+  mongodb_CEE:
+    image: mongo:latest
+    container_name: mongodb_CEE
+    ports:
+      - "27017:27017"
+    volumes:
+      - CEE_MONGO_DATA:/data/db
+    restart: unless-stopped
+  # Redis Setup for BullMq
+  redis_CEE:
     image: redis:7-alpine
-    container_name: local-redis
+    container_name: redis_CEE
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
     volumes:
-      - redis-data:/data
-
-  
-
+      - CEE_REDIS_DATA:/data
+    restart: unless-stopped
+  #BullMq DashBoard Setup 
   bull-dashboard:
     image: ghcr.io/pontusab/workbench-standalone:latest
     container_name: local-bullmq-dashboard
     ports:
       - "5000:3000"
     depends_on:
-      - redis
+      - redis_CEE
     environment:
       # This points internally to the 'redis' service above
-      - REDIS_URL=redis://local-redis:6379
-      # Change this to match the exact name of the queue in your code
-      # (Comma-separated for multiple queues: queue1,queue2)
-      - QUEUE_NAMES=my-queue 
-
-volumes:
-  redis-data:
+      - REDIS_URL=redis://redis_CEE:6379
+      - QUEUE_NAMES=submission 
+    #configuring Problem Service 
+  problem_service_CEE:
+    build:
+      context: ./ProblemService
+    image: problem-service-cee
+    container_name: problem_service_CEE
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_URL=mongodb://mongodb_CEE:27017/problem_db
+      - PORT=3000
+    depends_on:
+      - mongodb_CEE
+    restart: unless-stopped
+  # configuring Submission Service 
+  submission_service_CEE:
+    build: 
+      context: ./submission-service
+    image: submission-service-cee
+    container_name: submission_service_CEE
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DB_URL=mongodb://mongodb_CEE:27017/submission_db
+      - PROBLEM_SERVICE=http://problem_service_CEE:3000/api/v1
+      - REDIS_HOST=redis_CEE
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb_CEE
+      - redis_CEE
+    restart: unless-stopped
+  # configure the eval service
+  evaluation_service_CEE: 
+    build:
+      context: ./evalution-service
+    image: evaluation-service-cee
+    container_name: evaluation_service_CEE
+    ports:
+      - "3002:3002"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - PORT=3002
+      - REDIS_HOST=redis_CEE
+      - REDIS_PORT=6379
+      - SUBMISSION_SERVICE=http://submission_service_CEE:3001/api/v1
+      - PROBLEM_SERVICE=http://problem_service_CEE:3000/api/v1
+      
+    depends_on:
+      - redis_CEE
+      - problem_service_CEE
+      - submission_service_CEE
+    restart: unless-stopped
   
+volumes:
+  CEE_MONGO_DATA:
+  CEE_REDIS_DATA:
+
+
+

@@ -9,69 +9,69 @@ export interface CreateContainerOptions{
 export async function createNewDockerContainer(options:CreateContainerOptions){
     try{
         const docker= new Docker();
-        // const container = await docker.createContainer({
-        //     Image: options.imageName,
-        //     Cmd: options.cmdExecutable,
-        //     AttachStdin: true, // to allow stdin
-        //     AttachStdout: true, // to allow stdout
-        //     AttachStderr: true, // to allow stderr
-        //     Tty: false,
-        //     OpenStdin: true, // keep the input stream open even if no input is provided
-        //     HostConfig: {
-        //         Memory: options.memoryLimit,
-        //         PidsLimit: 100, // to limit the number of processes
-        //         CpuQuota: 50000,
-        //         CpuPeriod: 100000,
-        //         SecurityOpt: ['no-new-privileges'], // to prevent privilege escalation
-        //         NetworkMode: 'none', // to prevent network access
-        //     }
-        // });
         const container = await docker.createContainer({
             Image: options.imageName,
             Cmd: options.cmdExecutable,
-            AttachStdin: true,
-            AttachStdout: true,
-            AttachStderr: true,
+            AttachStdin: true, // to allow stdin
+            AttachStdout: true, // to allow stdout
+            AttachStderr: true, // to allow stderr
             Tty: false,
-            OpenStdin: true,
-          
-            // 1. Force execution as a non-root user
-            User: 'nobody', // or '1000:1000'
-          
+            OpenStdin: true, // keep the input stream open even if no input is provided
             HostConfig: {
-              Memory: options.memoryLimit, // e.g., 128 * 1024 * 1024 (128MB)
-              PidsLimit: 50,               // Reduced from 100 (50 is plenty for single script execution)
-              CpuQuota: 50000,             // 0.5 CPU core limit
-              CpuPeriod: 100000,
-              SecurityOpt: ['no-new-privileges'],
-              NetworkMode: 'none',
+                Memory: options.memoryLimit,
+                PidsLimit: 100, // to limit the number of processes
+                CpuQuota: 50000,
+                CpuPeriod: 100000,
+                SecurityOpt: ['no-new-privileges'], // to prevent privilege escalation
+                NetworkMode: 'none', // to prevent network access
+            }
+        });
+        // const container = await docker.createContainer({
+        //     Image: options.imageName,
+        //     Cmd: options.cmdExecutable,
+        //     AttachStdin: true,
+        //     AttachStdout: true,
+        //     AttachStderr: true,
+        //     Tty: false,
+        //     OpenStdin: true,
           
-              // --- SECURITY ADDITIONS ---
+        //     // 1. Force execution as a non-root user
+        //     User: 'nobody', // or '1000:1000'
           
-              // 2. Disable Swap Memory Expansion
-              MemorySwap: options.memoryLimit, // Setting MemorySwap equal to Memory means 0 Swap is allowed
+        //     HostConfig: {
+        //       Memory: options.memoryLimit, // e.g., 128 * 1024 * 1024 (128MB)
+        //       PidsLimit: 50,               // Reduced from 100 (50 is plenty for single script execution)
+        //       CpuQuota: 50000,             // 0.5 CPU core limit
+        //       CpuPeriod: 100000,
+        //       SecurityOpt: ['no-new-privileges'],
+        //       NetworkMode: 'none',
           
-              // 3. Drop all Linux Kernel Capabilities
-              CapDrop: ['ALL'],
+        //       // --- SECURITY ADDITIONS ---
           
-              // 4. Lock the filesystem to Read-Only
-              ReadonlyRootfs: true,
+        //       // 2. Disable Swap Memory Expansion
+        //       MemorySwap: options.memoryLimit, // Setting MemorySwap equal to Memory means 0 Swap is allowed
           
-              // 5. Provide a safe, isolated, size-limited temp storage
-              Tmpfs: {
-                '/tmp': 'rw,nosuid,size=64m', // 64MB RAM disk for temp/compiled files
-              },
+        //       // 3. Drop all Linux Kernel Capabilities
+        //       CapDrop: ['ALL'],
           
-              // 6. Limit output file sizes and process handles
-              Ulimits: [
-                { Name: 'fsize', Soft: 10 * 1024 * 1024, Hard: 10 * 1024 * 1024 }, // Max 10MB file creation
-                { Name: 'nofile', Soft: 64, Hard: 64 },                             // Max 64 open file descriptors
-              ],
+        //       // 4. Lock the filesystem to Read-Only
+        //       ReadonlyRootfs: true,
           
-              // 7. Clean up container filesystem on exit
-              AutoRemove: true,
-            },
-          });
+        //       // 5. Provide a safe, isolated, size-limited temp storage
+        //       Tmpfs: {
+        //         '/tmp': 'rw,nosuid,size=64m', // 64MB RAM disk for temp/compiled files
+        //       },
+          
+        //       // 6. Limit output file sizes and process handles
+        //       Ulimits: [
+        //         { Name: 'fsize', Soft: 10 * 1024 * 1024, Hard: 10 * 1024 * 1024 }, // Max 10MB file creation
+        //         { Name: 'nofile', Soft: 64, Hard: 64 },                             // Max 64 open file descriptors
+        //       ],
+          
+        //       // 7. Clean up container filesystem on exit
+              
+        //     },
+        //   });
         logger.info(`Container Created with id assigned ${container.id}`);
         return container;
     }
