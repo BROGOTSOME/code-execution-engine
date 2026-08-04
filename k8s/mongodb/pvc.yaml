@@ -1,0 +1,17 @@
+# this file is  created of persistent data volume support for pods 
+# the mongodb cannot be fun on a basic deployment_service/replica set service of k8s 
+# it needs to be run on stateful Set -- implemention details are mentioned in k8s docs 
+apiVersion: v1
+kind: PersistentVolumeClaim
+
+metadata:
+  name: mongodb-pvc
+
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      storage: 2Gi
+# ReadWriteOnce means the volume can be mounted read/write by a single node at a time, which is the common choice for MongoDB
