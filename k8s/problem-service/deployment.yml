@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: problem-service
-        image: problem-service-cee:latest
+        image: ishnrv3n/code_execution_engine_production-service:1.0
         imagePullPolicy: Never
         ports:
         - containerPort: 3000
