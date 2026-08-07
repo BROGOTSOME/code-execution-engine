@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: evaluation-service
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: evaluation-service
+
+  template:
+    metadata:
+      labels:
+        app: evaluation-service
+
+    spec:
+      volumes:
+        - name: docker-socket
+          emptyDir: {}
+
+      containers:
+        # ----------------------------
+        # Evaluation Service Container
+        # ----------------------------
+        - name: evaluation-service
+
+          image: ishnrv3n/code-execution-engine-evaluationservice:2.0   
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 3002
+
+          env:
+            - name: PORT
+              value: "3002"
+
+            - name: REDIS_HOST
+              value: redis-service
+
+            - name: REDIS_PORT
+              value: "6379"
+
+            - name: SUBMISSION_SERVICE
+              value: http://submission-service:3001/api/v1
+
+            - name: PROBLEM_SERVICE
+              value: http://problem-service:3000/api/v1
+
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run
+
+        
+        # Docker in Docker Sidecar
+        
+        - name: docker-daemon
+
+          image: docker:27-dind
+
+          securityContext:
+            privileged: true
+
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run
