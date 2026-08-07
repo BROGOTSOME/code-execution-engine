@@ -8,7 +8,21 @@ export interface CreateContainerOptions{
 }
 export async function createNewDockerContainer(options:CreateContainerOptions){
     try{
-        const docker= new Docker();
+        // const docker= new Docker();
+    // code fragement for dockerode to wait for docker in kubernetes environment
+        const docker = new Docker({
+    socketPath: "/var/run/docker.sock",
+});
+while (true) {
+    try {
+        await docker.ping();
+        console.log("Docker is ready!");
+        break;
+    } catch {
+        console.log("Waiting for Docker...");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+}
         const container = await docker.createContainer({
             Image: options.imageName,
             Cmd: options.cmdExecutable,
