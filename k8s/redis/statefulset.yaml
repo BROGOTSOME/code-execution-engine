@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+
+metadata:
+  name: redis
+
+spec:
+  serviceName: redis-service
+
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: redis
+
+  template:
+    metadata:
+      labels:
+        app: redis
+
+    spec:
+      containers:
+        - name: redis
+
+          image: redis:7-alpine
+
+          command:
+            - redis-server
+            - --appendonly
+            - "yes"
+
+          ports:
+            - containerPort: 6379
+
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+# its better to create a volumeclaime template instead manullay creating a pvc.yaml file because when redis will scale to 2 and more pod there will be one storage that will be shared between the pods and it will cause data loss. so to avoid that we can use volumeClaimTemplates which will create a pvc for each pod and each pod will have its own storage.
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-storage
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+
+        resources:
+          requests:
+            storage: 1Gi

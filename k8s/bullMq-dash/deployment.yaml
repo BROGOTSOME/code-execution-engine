@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: bull-dashboard
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: bull-dashboard
+
+  template:
+    metadata:
+      labels:
+        app: bull-dashboard
+
+    spec:
+      containers:
+        - name: bull-dashboard
+
+          image: ghcr.io/pontusab/workbench-standalone:latest
+
+          ports:
+            - containerPort: 3000
+
+          env:
+            - name: REDIS_URL
+              value: redis://redis-service:6379
+
+            - name: QUEUE_NAMES
+              value: submission
