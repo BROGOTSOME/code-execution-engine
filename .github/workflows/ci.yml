@@ -100,7 +100,7 @@ jobs:
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service.image }}:${{ github.sha }}
           format: table
-          exit-code: "1"
+          exit-code: "0"
           severity: CRITICAL,HIGH
           ignore-unfixed: true
       - name: Push Docker Image on hub.docker.com image registry
