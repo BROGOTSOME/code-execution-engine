@@ -1,0 +1,22 @@
+name: Kubernetes CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  k8s-val:
+    name: Validate k8s Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+      - name: Validate k8s yaml
+        run:  kubectl apply --dry-run=client --validate=true -R -f k8s/
